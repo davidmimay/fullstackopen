@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 // Components
 const Filter = ({filterName, handleFilterChange}) => (
@@ -33,8 +33,6 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilter] = useState('')
 
-  const baseUrl = 'http://localhost:3001/persons'
-  
   // Event handlers
   const addName = (event) => {
     event.preventDefault()
@@ -51,16 +49,16 @@ const App = () => {
         number: newNumber,
       }
       
-      axios
-        .post(baseUrl, personObject)
-        .then(response => {
-        setPersons(persons.concat(response.data)),
-        setNewName(''),
-        setNewNumber('')
-      })
-      .catch(error => {
-        console.log('Error saving person', error)
-      })
+      personService
+        .create(personObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => {
+          console.log('Error saving person', error)
+        })
     }
   }
 
@@ -85,12 +83,10 @@ const App = () => {
   // Effect
   useEffect (() => {
     console.log('Effect')
-    axios
-      .get(baseUrl)
-      .then((response) => {
-        console.log('promise fullfilled')
-        setPersons(response.data)
-      }).catch((err) => {
+    personService
+      .getAll()
+      .then(initialPersons => setPersons (initialPersons))
+      .catch((err) => {
         console.log(err)
       })
   }, [])
