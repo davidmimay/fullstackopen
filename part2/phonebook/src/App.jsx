@@ -16,13 +16,16 @@ const PersonsForm = ({addName, newName, handleNameChange, newNumber, handleNumbe
   </div>
 )
 
-const Person = ({person}) => (
-  <p>{person.name} {person.number}</p>
+const Person = ({person, deletePerson}) => (
+  <p>
+    {person.name} {person.number}
+    <button onClick={() => deletePerson(person.id, person.name)}>X</button>
+  </p>
 )
 
-const Persons = ({filterDisplay}) => (
+const Persons = ({filterDisplay, deletePerson}) => (
   <div>
-    {filterDisplay.map(person => <Person key={person.id} person={person} />)}
+    {filterDisplay.map(person => <Person key={person.id} person={person} deletePerson={deletePerson} />)}
   </div>
 )
 
@@ -62,6 +65,21 @@ const App = () => {
     }
   }
 
+  const deletePerson = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== id))
+        })
+        .catch(error => {
+          console.log(`The person ${name} was already deleted from server`, error)
+          alert(`${name} was already deleted`)
+          setPersons(persons.filter(person => person.id !== id))
+        })
+    }
+  }
+
   const handleNameChange = (event) => {
     console.log(event.target.value)
     setNewName(event.target.value)
@@ -91,7 +109,7 @@ const App = () => {
       })
   }, [])
 
-  // Intereface
+  // Interface
   return (
     <div>
       <h2>Phonebook</h2>
@@ -105,7 +123,7 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <div><i>debug: {newName} {newNumber}</i></div>
-      <Persons filterDisplay={filterDisplay}/>
+      <Persons filterDisplay={filterDisplay} deletePerson={deletePerson}/>
     </div>
   )
 }
