@@ -41,9 +41,24 @@ const App = () => {
     event.preventDefault()
     console.log('Button clicked', event.target);
 
-    if (persons.some(person => person.name === newName)) {
-      console.log('Cannot add it')
-      alert(`${newName} is already added to phonebook`)
+    const oldName = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+
+    if (oldName) {
+      console.log('Cannot add it, perhaps update')
+      const confirmUpdate = window.confirm(`${newName} is already added to phonebook, want to update?`)
+      if (confirmUpdate) {
+        const updatedPerson = { ...oldName, number: newNumber}
+        personService
+          .update(oldName.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== oldName.id ? person : returnedPerson))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => {
+          console.log('Error updating person', error)
+          })
+      }
     }
 
     else {
