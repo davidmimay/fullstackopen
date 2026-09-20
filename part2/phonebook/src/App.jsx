@@ -22,7 +22,7 @@ const Person = ({person}) => (
 
 const Persons = ({filterDisplay}) => (
   <div>
-    {filterDisplay.map(person => <Person key={person.name} person={person} />)}
+    {filterDisplay.map(person => <Person key={person.id} person={person} />)}
   </div>
 )
 
@@ -33,6 +33,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilter] = useState('')
 
+  const baseUrl = 'http://localhost:3001/persons'
+  
   // Event handlers
   const addName = (event) => {
     event.preventDefault()
@@ -45,12 +47,20 @@ const App = () => {
 
     else {
       const personObject = {
-          name: newName,
-          number: newNumber,
-        }
-        setPersons(persons.concat(personObject))
-        setNewName('')    
-        setNewNumber('')    
+        name: newName,
+        number: newNumber,
+      }
+      
+      axios
+        .post(baseUrl, personObject)
+        .then(response => {
+        setPersons(persons.concat(response.data)),
+        setNewName(''),
+        setNewNumber('')
+      })
+      .catch(error => {
+        console.log('Error saving person', error)
+      })
     }
   }
 
@@ -76,7 +86,7 @@ const App = () => {
   useEffect (() => {
     console.log('Effect')
     axios
-      .get('http://localhost:3001/persons')
+      .get(baseUrl)
       .then((response) => {
         console.log('promise fullfilled')
         setPersons(response.data)
