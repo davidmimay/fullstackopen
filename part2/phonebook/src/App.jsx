@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
+import './App.css'
 
 // Components
 const Filter = ({filterName, handleFilterChange}) => (
@@ -29,12 +30,21 @@ const Persons = ({filterDisplay, deletePerson}) => (
   </div>
 )
 
+const Notification = ({type, message}) => {
+  if (message === null){
+    return null
+  }
+  return (<div className={`notification ${type}`}>{message}</div>)
+}
+
 const App = () => {
   // States
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilter] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [messageType, setMessageType] = useState('success')
 
   // Event handlers
   const addName = (event) => {
@@ -54,9 +64,11 @@ const App = () => {
             setPersons(persons.map(person => person.id !== oldName.id ? person : returnedPerson))
             setNewName('')
             setNewNumber('')
+            showNotification(`Updated ${newName}`, 'success')
           })
           .catch(error => {
-          console.log('Error updating person', error)
+            console.log('Error updating person', error)
+            showNotification(`Cannot update ${newName}`, 'error')
           })
       }
     }
@@ -73,6 +85,7 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          showNotification(`Created ${returnedPerson.name}`, 'success')
         })
         .catch(error => {
           console.log('Error saving person', error)
@@ -89,7 +102,6 @@ const App = () => {
         })
         .catch(error => {
           console.log(`The person ${name} was already deleted from server`, error)
-          alert(`${name} was already deleted`)
           setPersons(persons.filter(person => person.id !== id))
         })
     }
@@ -110,6 +122,14 @@ const App = () => {
     setFilter(event.target.value)
   }
 
+  const showNotification = (message, type) => {
+    setErrorMessage(message)
+    setMessageType(type)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000)
+  }
+
   // Array
   const filterDisplay = persons.filter(person => person.name.toLowerCase().includes(filterName.toLowerCase()))
   
@@ -128,7 +148,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} type={messageType} />
       <Filter filterName={filterName} handleFilterChange={handleFilterChange}/>
+      <h3>Create</h3>
       <PersonsForm
         addName={addName}
         newName={newName}
@@ -136,7 +158,7 @@ const App = () => {
         newNumber={newNumber}
         handleNumberChange={handleNumberChange}
       />
-      <h2>Numbers</h2>
+      <h3>Numbers</h3>
       <div><i>debug: {newName} {newNumber}</i></div>
       <Persons filterDisplay={filterDisplay} deletePerson={deletePerson}/>
     </div>
