@@ -68,7 +68,8 @@ const App = () => {
           })
           .catch(error => {
             console.log('Error updating person', error)
-            showNotification(`Cannot update ${newName}`, 'error')
+            showNotification(`Information of '${oldName.name}' has already been removed from server`, 'error')
+            setPersons(persons.filter(person => person.id !== oldName.id))
           })
       }
     }
@@ -89,6 +90,7 @@ const App = () => {
         })
         .catch(error => {
           console.log('Error saving person', error)
+          showNotification(`Cannot save contact`, 'error')
         })
     }
   }
@@ -99,9 +101,11 @@ const App = () => {
         .remove(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id))
+          showNotification(`Deleted ${name}`, 'success')
         })
         .catch(error => {
           console.log(`The person ${name} was already deleted from server`, error)
+          showNotification(`Information of '${name}' has already been removed from server`, 'error')
           setPersons(persons.filter(person => person.id !== id))
         })
     }
