@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import countryService from './services/countries'
-
+import './App.css'
 // Components
 
 const CountryDetail = ({country}) => {
@@ -25,7 +25,7 @@ const CountryDetail = ({country}) => {
   )
 }
 
-const CountryList = ({countries}) => {
+const CountryList = ({countries, handleShowCountry}) => {
   if (countries.length > 10) {
     return <p>Too many matches, specify more</p>
   }
@@ -37,7 +37,9 @@ const CountryList = ({countries}) => {
   return (
     <div className='result'>
       {countries.map(country => (
-        <div key={country.cca3}>{country.name.common}</div>
+        <div key={country.cca3}>{country.name.common}
+          <button onClick={() => handleShowCountry(country.name.common)}>Show</button>
+        </div>
       ))}
     </div>
   )
@@ -65,6 +67,10 @@ const App = () => {
     setQuery(event.target.value)
   }
 
+  const handleShowCountry = (countryName) => {
+    setQuery(countryName)
+  }
+
   const filteredCountries = query.trim() === ''
     ? []
     : countries.filter(country => country.name.common.toLowerCase().includes(query.toLocaleLowerCase()))
@@ -75,7 +81,7 @@ const App = () => {
         Find countries <input value={query} onChange={handleQueryChange} />
       </div>
       <div>
-        {query.trim() !== '' && <CountryList countries={filteredCountries} />}
+        {query.trim() !== '' && <CountryList countries={filteredCountries} handleShowCountry={handleShowCountry} />}
       </div>
     </div>
   )
